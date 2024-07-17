@@ -41,6 +41,21 @@ def count_calls(method: Callable) -> Callable:
     return invoker
 
 
+def replay(method: Callable) -> None:
+    '''
+    history of previous callls
+    '''
+    fn_name = method.__qualname__
+    db = method.__self__.redis
+    inputs = db.lrange(fn_name + ':inputs', 0, -1)
+    outputs = db.lrange(fn_name + ':outputs', 0 ,-1)
+
+    print('{} was called {} times:'.format(fn_name, len(inputs)))
+    for in_put, out_put in zip(inputs, outputs):
+        in_put = in_put.decode('utf-8')
+        out_put = out_put.decode('utf-8')
+        print('{} (*{}) -> {}'.format(fn_name, in_put, out_put))
+
 
 class Cache:
     '''
